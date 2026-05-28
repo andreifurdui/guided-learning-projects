@@ -146,9 +146,9 @@ guided-learning-projects/
 ├── .claude/
 │   └── commands/
 │       └── create-learning-project.md # The skill — runs automatically on clone
-└── templates/                         # Reference-only copies of per-project commands
-    ├── create-module.md               # Module generation (adapted per project)
-    └── review-module.md               # Socratic review (adapted per project)
+└── templates/                         # Authoritative source for the per-module commands
+    ├── create-module.md               # Source for /create-module (slot-filled at generation)
+    └── review-module.md               # Source for /review-module (slot-filled at generation)
 ```
 
-The `templates/` directory holds **reference-only** copies of the per-module commands, so you can read their shape before running the skill. Editing them does **not** change generated output — the authoritative copies are embedded inside `create-learning-project.md` and written out during generation. Both `templates/` and the bootstrap command are removed automatically once your course is scaffolded, leaving a clean course repo.
+The `templates/` directory is the **authoritative source** for the two per-module commands. When you run `/create-learning-project`, the skill reads each template, fills its course-specific adaptation slots (marked with `<!-- SLOT:… -->`), and writes the result to `.claude/commands/`. **Editing a template changes what gets generated** — this is where you'd tune module generation or Socratic review across all your courses. Everything outside the slots is preserved verbatim, so the structure stays consistent. Both `templates/` and the bootstrap command are removed automatically once your course is scaffolded, leaving a clean course repo with its own `.claude/commands/`.

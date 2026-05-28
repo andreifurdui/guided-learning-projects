@@ -279,8 +279,8 @@ Generate the full authoring conventions document. This is the "system prompt" fo
 - Deep dives deferred to specific external resources with section-level precision
 
 **3. Code guidance conventions:**
-- 🔧 CORE: signature, type hints, docstring, pseudocode, NotImplementedError stub. No implementation body.
-- ⚙️ INFRASTRUCTURE: describe purpose and interface. Agent implements freely.
+- 🔧 CORE: signature, type hints, docstring, pseudocode *that guides the approach without giving the solution*, NotImplementedError stub. No implementation body. CORE = the idea the student must derive and implement.
+- ⚙️ INFRASTRUCTURE: describe purpose and interface. Agent implements freely. INFRASTRUCTURE = setup/display/glue around the idea (I/O, plotting, config).
 - ▶️ RUN: exact commands with parameter annotations.
 - Every code block must be tagged with one of the three categories.
 
@@ -288,6 +288,8 @@ Generate the full authoring conventions document. This is the "system prompt" fo
 - Tests specified before implementations in the module document
 - Tests in `tests/test_module_NN.py`, runnable with pytest
 - Test categories: numerical assertions, shape/type checks, invariant checks, visual verification (saved plots), system tests
+- Each 🔧 CORE function has ≥1 numerical or invariant test with known expected values (not just a shape check)
+- Tests import cleanly and, before implementation, fail only with `NotImplementedError` — never `ImportError` or a collection error
 - Test cases provided inline in the module doc in copy-paste-ready format
 
 **5. Project layout** — the exact directory structure with annotations
@@ -300,142 +302,37 @@ Generate the full authoring conventions document. This is the "system prompt" fo
 - Every concept motivated before introduced
 - Every equation has plain-English preamble and practical note
 - Every code block tagged 🔧/⚙️/▶️
-- Core functions have signature, types, docstring, pseudocode, tests
+- Core functions have signature, types, docstring, guiding (non-solving) pseudocode, and a numerical/invariant test
 - Infrastructure describes purpose and interface
-- Tests before implementations
+- Tests before implementations and import cleanly (fail only with `NotImplementedError`)
 - Verification checkpoints after each section
 - Integration checkpoint runs full pipeline
+- Self-check run (or explicitly skipped with a note when the environment isn't set up)
 - Deliverables with exact paths
 - Resources with section-level specificity
 - No notebooks
 
 ### 6. .claude/commands/create-module.md
 
-Generate the file `.claude/commands/create-module.md` with the following EXACT content, adapted only where indicated by [brackets]:
+Read `templates/create-module.md` and write its content to `.claude/commands/create-module.md`. **This template is the single source of truth** — do not paraphrase, reorder, or drop sections.
+
+**Slot rule.** The template contains adaptation slots marked like this:
 
 ```
-Build Module $ARGUMENTS for this learning project.
-
-## Instructions
-
-Before doing anything, read these files completely — they define every convention you must follow:
-
-1. `docs/module_guidelines.md` — the authoritative structure, style, and code conventions for all modules
-2. `docs/course_overview.md` — the full course structure, module summaries, and technical spec
-3. `CLAUDE.md` — critical project rules (especially: never implement 🔧 CORE function bodies)
-
-Then read the current state of the codebase:
-4. The source file(s) this module creates or extends (check the Module-to-Codebase Mapping table in the guidelines)
-5. `tests/conftest.py` — shared fixtures available for tests
-6. [The project's central config file path, e.g., `configs/dataset.yaml`] — [description of what it contains]
-
-If any previous module documents exist in `docs/modules/`, read the most recent one to maintain consistency in depth, tone, and quality.
-
-## What to produce
-
-### 1. Module document
-Write `docs/modules/module_NN_<slug>.md` following the exact section structure from the guidelines:
-- Header block (module number, title, time estimate, prerequisites, "you will build", "you will learn")
-- Motivation (3–5 sentences, concrete forward reference)
-- Theory + Implementation (interleaved, Feynman method, every concept motivated, every equation with plain-English preamble and practical note, 🔧/⚙️/▶️ tags on all code)
-- Integration checkpoint (exact script to run, what correct output looks like, common failure modes)
-- Deliverables (files with exact paths, artifacts, understanding statements)
-- Key resources (3–5, with section-level specificity)
-
-Use web search to find and verify the best current resources, documentation links, and technical details for the topics covered. Don't rely on memory for URLs or API details.
-
-### 2. Test file
-Write `tests/test_module_NN.py` with all test cases specified in the module document. Tests come BEFORE the functions they verify (test-first). Use fixtures from `conftest.py` where applicable. Tests must be runnable with `pytest` even before 🔧 CORE functions are implemented (they will raise NotImplementedError — that's expected).
-
-### 3. Source file updates
-Update the appropriate `src/[package name]/*.py` file(s):
-- Add 🔧 CORE function stubs: signature, type hints, full docstring, pseudocode comments, `raise NotImplementedError` — but NOT the implementation body
-- Add ⚙️ INFRASTRUCTURE functions: implement these fully
-- Add necessary imports
-
-### 4. Runner script
-Write `scripts/run_module_NN.py` — the end-to-end entry point for the module's integration checkpoint. It imports from the project library, calls the relevant functions, and saves outputs to `outputs/module_NN/`.
-
-## Quality checks before finishing
-
-Run through the checklist from the module guidelines:
-- Every concept motivated before introduced
-- Every equation has plain-English preamble and practical note
-- Every code block tagged 🔧 CORE, ⚙️ INFRASTRUCTURE, or ▶️ RUN
-- Core functions have signature, type hints, docstring, pseudocode, test specification
-- Infrastructure tasks describe purpose and interface
-- Tests specified before implementations
-- Verification checkpoints after each implementation section
-- Integration checkpoint runs full pipeline
-- Deliverables list files with exact paths
-- Key resources have section-level specificity
-- Module document specifies which files it creates/extends
-- No notebooks — visualization via saved plots, web viewers, or rendered videos
-- No 🔧 CORE function bodies implemented — only stubs
+<!-- SLOT:slot_id — fill: <instruction for what to inject> -->
+<default placeholder content>
+<!-- /SLOT:slot_id -->
 ```
 
-Adapt only the [bracketed] sections to match the project's specific package name, config paths, and structure. Preserve everything else exactly.
+For each slot: replace **only** the content between the two markers, following its `fill:` instruction and drawing from the course plan you just designed; then **delete the two marker lines** so the generated file contains no `<!-- SLOT ... -->` comments. Copy everything outside slot blocks **verbatim**. If a slot genuinely can't be filled, keep its default text (still strip the markers).
+
+Fill targets for this command: `config_ref` (the project's central config path + description), `source_map_ref` (the concrete `src/<package>/…` path for module source), `domain_test_focus` (2–4 domain-specific test categories / failure modes).
 
 ### 7. .claude/commands/review-module.md
 
-Generate the file `.claude/commands/review-module.md` with the following EXACT content, adapted only where indicated by [brackets]:
+Read `templates/review-module.md` and write its content to `.claude/commands/review-module.md` using the **identical slot rule from section 6**. Preserve all four dialog phases, every conduct rule, and the complete "What NOT to do" section verbatim.
 
-```
-Conduct a Socratic dialog on Module $ARGUMENTS of this learning project.
-
-## Instructions
-
-Read the completed module document at `docs/modules/` for the specified module number. Also read `docs/module_guidelines.md` for context on course conventions, and any source files the module created or extended in `src/[package name]/`.
-
-Your role is a knowledgeable but curious colleague — not an examiner. You are helping the student solidify understanding and deepen intuition through conversation. You genuinely want to know how they think about these concepts.
-
-## Dialog structure
-
-### Phase 1 — Warm-up (1–2 questions)
-Start with a broad, open-ended question about the module's central concept. The goal is to get the student talking and to gauge their comfort level. Ask them to explain something in their own words, as if to a colleague who works in a related field but hasn't worked on this specific topic.
-
-Examples of good opening questions:
-- [Include 2 domain-specific examples based on the project's topic]
-
-### Phase 2 — Probing intuition (3–5 questions)
-Dig into the "why" behind each concept. These questions should not have textbook answers — they require the student to reason from understanding, not recall.
-
-Good patterns:
-- **"What would happen if..."** — perturb something and ask what breaks
-- **"Why this and not that?"** — probe design choices
-- **"Where does this fail?"** — find the edges of understanding
-- **"Connect to the bigger picture"** — link to the final project goal
-
-### Phase 3 — Edge cases and debugging (2–3 questions)
-Present a concrete scenario where something goes wrong and ask the student to diagnose it. These should be realistic failure modes from the module's domain.
-
-Examples:
-- [Include 2 domain-specific debugging scenarios based on the project's topic]
-
-### Phase 4 — Synthesis (1 question)
-End with a forward-looking question that connects this module to the next one. The student should articulate what they now have, what's still missing, and why the next module exists.
-
-## Conduct rules
-
-- **One question at a time.** Ask a question, wait for the answer, then respond before asking the next one.
-- **Never give the answer.** If the student is stuck, give a hint by rephrasing or narrowing the question. If they're still stuck, point them to the specific section of the module doc that covers it and ask them to re-read and try again.
-- **Affirm correct reasoning, gently correct wrong reasoning.** When correcting, explain *why* their reasoning doesn't hold rather than just stating the right answer. Use "almost — but consider..." rather than "no, that's wrong."
-- **Follow their thread.** If the student's answer opens an interesting tangent that's relevant to the module, follow it for one exchange before returning to the planned sequence. Good tangents are more valuable than rigid structure.
-- **Adapt difficulty.** If the student nails the warm-up with deep understanding, skip to harder questions. If they struggle early, slow down and add more scaffolding questions.
-- **Keep it conversational.** No numbered question lists, no "Question 3 of 8" framing. This is a dialog, not an exam.
-- **End cleanly.** After the synthesis question, briefly summarize the key insights that emerged from the conversation (not the textbook answers — the insights *this specific student* arrived at). Note any areas worth revisiting.
-
-## What NOT to do
-
-- Don't ask recall questions ("What are the four parameters of...?")
-- Don't ask yes/no questions
-- Don't present multiple choice options
-- Don't lecture — if you're talking for more than 3 sentences, you've stopped being Socratic
-- Don't rush through questions to cover everything — depth on 3 concepts beats surface on 10
-- Don't quiz on implementation details ("What function did you use for...") — focus on conceptual understanding
-```
-
-Adapt only the [bracketed] sections — the domain-specific examples and the package name. Preserve the full structure, all four phases, all conduct rules, and the complete "What NOT to do" section exactly.
+Fill targets for this command: `source_ref` (the `src/<package>/` path where module source lives), `phase1_examples` (2 opening questions for the course domain), `phase3_examples` (2 domain-specific debugging scenarios), `common_misconceptions` (3–5 misconceptions students hold about this domain). Draw all of these from the course's topic and module plan.
 
 ### 8. Source file stubs
 
@@ -466,7 +363,7 @@ This is the **last** step. Run it only after every file above has been written. 
 
 1. **Confirm the generated `CLAUDE.md` and `README.md` are in place.** They overwrite the starter versions that shipped with the clone — make sure this happened before staging.
 2. **Remove the starter-only files** now that the course is generated:
-   - the `templates/` directory (human-reference copies; not needed in a generated course)
+   - the `templates/` directory — but **only after sections 6 & 7 have already written** `.claude/commands/create-module.md` and `.claude/commands/review-module.md` from it (the templates are the source for those files; they are not needed in the generated course once written)
    - this bootstrap command itself: `.claude/commands/create-learning-project.md` (it is a one-time scaffolding command; removing it leaves `.claude/commands/` holding exactly `create-module.md` and `review-module.md`). Deleting it now is safe — the command's instructions are already loaded in this session and are not re-read from disk.
 3. **Initialize a fresh local git repository** for the course and make the first commit:
    ```bash
@@ -487,8 +384,8 @@ Before presenting the generated project to the user, verify:
 - [ ] The technical stack choices are current and well-supported (verified via web search)
 - [ ] The codebase structure is clean — one file per topic, clear imports between modules
 - [ ] The CLAUDE.md contains both the General Guidelines (verbatim) and project-specific conventions
-- [ ] The create-module command contains the full template with all sections and quality checklist
-- [ ] The review-module command contains all four dialog phases, all conduct rules, and the full "What NOT to do" section
+- [ ] `.claude/commands/create-module.md` matches `templates/create-module.md` — slots filled from the course plan, all markers stripped, everything else verbatim
+- [ ] `.claude/commands/review-module.md` matches `templates/review-module.md` — slots filled (incl. domain examples), markers stripped, all four phases / conduct rules / "What NOT to do" verbatim
 - [ ] The README explains the full workflow clearly enough for a first-time user
 - [ ] The module guidelines contain all 8 sections specified above
 - [ ] No notebooks anywhere — all visualization via plots, web viewers, or rendered media
