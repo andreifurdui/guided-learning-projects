@@ -25,7 +25,7 @@ You build the course progressively: generate Module 0, work through it, review i
 One command. Clone the starter, open Claude inside it, and go:
 
 ```bash
-git clone --depth=1 https://github.com/<your-org>/guided-learning-projects.git my-course && cd my-course && rm -rf .git && claude
+git clone --depth=1 https://github.com/andreifurdui/guided-learning-projects.git my-course && cd my-course && rm -rf .git && claude
 ```
 
 There's nothing to install — the `/create-learning-project` command ships inside the repo at `.claude/commands/`, so it's available the moment Claude opens in the folder.
